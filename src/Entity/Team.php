@@ -28,7 +28,7 @@ class Team
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\League", inversedBy="teams")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $league;
 
@@ -71,5 +71,15 @@ class Team
         $this->league = $league;
 
         return $this;
+    }
+
+    public function toJson(): array
+    {
+        return [
+            'id'     => $this->getId(),
+            'name'   => $this->getName(),
+            'strip'  => $this->getStrip(),
+            'league' => $this->getLeague(),
+        ];
     }
 }

@@ -80,4 +80,13 @@ class League
 
         return $this;
     }
+
+    public function toJson(): array
+    {
+        return [
+            'id'    => $this->getId(),
+            'name'  => $this->getName(),
+            'teams' => $this->getTeams(),
+        ];
+    }
 }

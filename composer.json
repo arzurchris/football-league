@@ -6,6 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "symfony/console": "*",
+        "symfony/expression-language": "*",
         "symfony/flex": "^1.1",
         "symfony/framework-bundle": "*",
         "symfony/orm-pack": "^1.0",
@@ -17,6 +18,7 @@
         "symfony/dotenv": "*",
         "symfony/maker-bundle": "^1.7",
         "symfony/phpunit-bridge": "*",
+        "symfony/var-dumper": "*",
         "symfony/web-server-bundle": "*"
     },
     "config": {
