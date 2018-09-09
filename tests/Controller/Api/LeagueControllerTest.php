@@ -18,6 +18,14 @@ class LeagueControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
+        $client->request('DELETE', '/api/league/123456789');
+        $response = $client->getResponse();
+
+        $this->assertEquals(404, $response->getStatusCode());
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertFalse($data['result']);
+
         $client->request('GET', '/api/leagues');
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);

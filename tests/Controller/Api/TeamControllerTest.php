@@ -37,17 +37,43 @@ class TeamControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
+        $parameters = [];
+        $client->request('POST', '/api/teams', $parameters);
+        $response = $client->getResponse();
+        $this->assertEquals(400, $response->getStatusCode());
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertFalse($data['result']);
+        $this->assertEquals('Parameter not defined : name', $data['message']);
+
+        $parameters = ['name' => 'PSG'];
+        $client->request('POST', '/api/teams', $parameters);
+        $response = $client->getResponse();
+        $this->assertEquals(400, $response->getStatusCode());
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertFalse($data['result']);
+        $this->assertEquals('Parameter not defined : leagueId', $data['message']);
+
+        $parameters = ['name' => 'PSG', 'leagueId' => 12345678];
+        $client->request('POST', '/api/teams', $parameters);
+        $response = $client->getResponse();
+        $this->assertEquals(404, $response->getStatusCode());
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertFalse($data['result']);
+        $this->assertEquals('League does not exist with id:' . $parameters['leagueId'], $data['message']);
+
         $client->request('GET', '/api/leagues');
         $oResponse = $client->getResponse();
         $result = json_decode($oResponse->getContent(), true);
         /** @var League $league */
         $league = reset($result);
 
-        $data = ['name' => 'PSG', 'leagueId' => $league['id']];
+        $parameters = ['name' => 'PSG', 'leagueId' => $league['id']];
 
-        $client->request('POST', '/api/teams', $data);
+        $client->request('POST', '/api/teams', $parameters);
         $response = $client->getResponse();
-
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode($response->getContent(), true);
 
@@ -63,6 +89,18 @@ class TeamControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
+        $parameters=[];
+        $client->request('PUT', '/api/team/12345678', [], [], [
+            'CONTENT_TYPE' => 'application/json'
+        ], json_encode($parameters));
+
+        $oResponse = $client->getResponse();
+        $this->assertEquals(404, $oResponse->getStatusCode());
+        $data = json_decode($oResponse->getContent(), true);
+        $this->assertArrayHasKey('result', $data);
+        $this->assertFalse($data['result']);
+        $this->assertEquals('Team does not exist with id:12345678', $data['message']);
+
         $client->request('GET', '/api/leagues');
         $oResponse = $client->getResponse();
         $result = json_decode($oResponse->getContent(), true);
@@ -75,11 +113,11 @@ class TeamControllerTest extends WebTestCase
         /** @var Team $team */
         $team = reset($result);
 
-        $data = ['name' => 'SRFC', 'strip' => 'puma', 'leagueId' => $league['id']];
+        $parameters = ['name' => 'SRFC', 'strip' => 'puma', 'leagueId' => $league['id']];
 
         $client->request('PUT', '/api/team/' . $team['id'], [], [], [
             'CONTENT_TYPE' => 'application/json'
-        ], json_encode($data));
+        ], json_encode($parameters));
 
         $oResponse = $client->getResponse();
         $this->assertEquals(200, $oResponse->getStatusCode());

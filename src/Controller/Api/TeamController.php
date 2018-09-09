@@ -18,12 +18,12 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class TeamControllerTest
  * @package App\Controller\Api
- *
+ * @Route("/", condition="context.getHost() in ['localhost', '127.0.0.1']")
  */
 class TeamController extends Controller
 {
     /**
-     * @Route("/api/teams", methods={"GET"}, condition="context.getHost() in ['localhost']")
+     * @Route("api/teams", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
      */
@@ -41,7 +41,7 @@ class TeamController extends Controller
     }
 
     /**
-     * @Route("/api/teams", methods={"POST"}, condition="context.getHost() in ['localhost']")
+     * @Route("api/teams", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      */
@@ -84,7 +84,7 @@ class TeamController extends Controller
     }
 
     /**
-     * @Route("/api/team/{id}", methods={"PUT"}, requirements={"id"="\d+"}, condition="context.getHost() in ['localhost']")
+     * @Route("api/team/{id}", methods={"PUT"}, requirements={"id"="\d+"})
      * @param Request $request
      * @param int     $id
      * @return JsonResponse
@@ -99,7 +99,6 @@ class TeamController extends Controller
             ], 404);
         }
         $content = json_decode($request->getContent());
-
 
         $name = $content->name ?? null;
         if ($name) {

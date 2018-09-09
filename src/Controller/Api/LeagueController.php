@@ -7,6 +7,7 @@
  */
 
 namespace App\Controller\Api;
+
 use App\Entity\League;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,11 +17,12 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class LeagueController
  * @package App\Controller\Api
+ * @Route("/", condition="context.getHost() in ['localhost', '127.0.0.1']")
  */
 class LeagueController extends Controller
 {
     /**
-     * @Route("/api/leagues", methods={"GET"}, condition="context.getHost() in ['localhost']")
+     * @Route("/api/leagues", methods={"GET"})
      * @param Request $request
      * @return JsonResponse
      */
@@ -38,9 +40,9 @@ class LeagueController extends Controller
     }
 
     /**
-     * @Route("/api/league/{id}", methods={"GET"}, requirements={"id"="\d+"}, condition="context.getHost() in ['localhost']")
+     * @Route("/api/league/{id}", methods={"GET"}, requirements={"id"="\d+"})
      * @param Request $request
-     * @param int $id
+     * @param int     $id
      * @return JsonResponse
      */
     public function getLeagueAction(Request $request, int $id): JsonResponse
@@ -58,9 +60,9 @@ class LeagueController extends Controller
     }
 
     /**
-     * @Route("/api/league/{id}", methods={"DELETE"}, requirements={"id"="\d+"}, condition="context.getHost() in ['localhost']")
+     * @Route("/api/league/{id}", methods={"DELETE"}, requirements={"id"="\d+"})
      * @param Request $request
-     * @param int $id
+     * @param int     $id
      * @return JsonResponse
      */
     public function deleteLeagueAction(Request $request, int $id): JsonResponse
@@ -79,6 +81,5 @@ class LeagueController extends Controller
         return new JsonResponse([
             'result' => true,
         ]);
-
     }
 }
