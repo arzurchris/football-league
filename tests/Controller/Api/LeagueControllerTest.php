@@ -9,39 +9,61 @@
 namespace App\Tests\Controller\Api;
 
 use App\Entity\League;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class LeagueControllerTest extends WebTestCase
+class LeagueControllerTest extends AbstractControllerTest
 {
+
+    private $token;
+
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->token = static::$kernel->getContainer()
+            ->get('lexik_jwt_authentication.encoder')
+            ->encode(['username' => 'my_username']);
+
+    }
 
     public function testDeleteLeague(): void
     {
-        $client = static::createClient();
-
-        $client->request('DELETE', '/api/league/123456789');
-        $response = $client->getResponse();
+        $response = $this->client->delete('/api/league/123456789', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
 
         $this->assertEquals(404, $response->getStatusCode());
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('result', $data);
         $this->assertFalse($data['result']);
 
-        $client->request('GET', '/api/leagues');
-        $response = $client->getResponse();
-        $result = json_decode($response->getContent(), true);
+        $response = $this->client->get('/api/leagues', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
+
+        $result = json_decode($response->getBody(), true);
         /** @var League $league */
         $league = reset($result);
-        
-        $client->request('DELETE', '/api/league/'. $league['id']);
-        $response = $client->getResponse();
+
+        $response = $this->client->delete('/api/league/' . $league['id'], [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
 
         $this->assertEquals(200, $response->getStatusCode());
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('result', $data);
         $this->assertTrue($data['result']);
 
-        $client->request('GET', '/api/league/' . $league['id']);
-        $response = $client->getResponse();
+        $response = $this->client->get('/api/league/' . $league['id'], [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
         $this->assertEquals($response->getStatusCode(), 404);
     }
 }

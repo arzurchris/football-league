@@ -67,6 +67,8 @@ class LeagueController extends Controller
      */
     public function deleteLeagueAction(Request $request, int $id): JsonResponse
     {
+        // $this->denyAccessUnlessGranted('ROLE_USER');
+
         $league = $this->getDoctrine()->getRepository('App:League')->find($id);
         if (!$league) {
             return new JsonResponse([

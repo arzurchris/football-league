@@ -27,14 +27,17 @@ class TeamFixtures extends Fixture
         for ($i = 0; $i < 20; $i++) {
             $team = new Team();
             $team->setName('team ' . $i);
-            $arrayReference = [LeagueFixtures::LEAGUE_1_REFERENCE, LeagueFixtures::LEAGUE_2_REFERENCE];
+            $arrayReference = [
+                LeagueFixtures::LEAGUE_1_REFERENCE,
+                LeagueFixtures::LEAGUE_2_REFERENCE,
+                LeagueFixtures::LEAGUE_3_REFERENCE
+            ];
             $reference = $arrayReference[array_rand($arrayReference)];
             $team->setLeague($this->getReference($reference));
             $manager->persist($team);
         }
 
         $manager->flush();
-
     }
 
     /**

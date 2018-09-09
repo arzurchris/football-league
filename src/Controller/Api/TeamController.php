@@ -47,7 +47,8 @@ class TeamController extends Controller
      */
     public function postTeamsAction(Request $request): JsonResponse
     {
-        $name = $request->get('name');
+        $content = json_decode($request->getContent());
+        $name = $content->name ?? null;
         if (empty($name)) {
             return new JsonResponse([
                 'result'  => false,
@@ -55,7 +56,7 @@ class TeamController extends Controller
             ], 400);
         }
 
-        $leagueId = $request->get('leagueId');
+        $leagueId = $content->leagueId ?? null;
         if (empty($leagueId)) {
             return new JsonResponse([
                 'result'  => false,

@@ -17,6 +17,7 @@ class LeagueFixtures extends Fixture
 
     public const LEAGUE_1_REFERENCE = 'league-1';
     public const LEAGUE_2_REFERENCE = 'league-2';
+    public const LEAGUE_3_REFERENCE = 'league-3';
 
     /**
      * @param ObjectManager $manager
@@ -36,6 +37,13 @@ class LeagueFixtures extends Fixture
         $manager->flush();
 
         $this->addReference(self::LEAGUE_2_REFERENCE, $league2);
+
+        $league3 = new League();
+        $league3->setName('league 3');
+        $manager->persist($league3);
+        $manager->flush();
+
+        $this->addReference(self::LEAGUE_3_REFERENCE, $league3);
 
     }
 }

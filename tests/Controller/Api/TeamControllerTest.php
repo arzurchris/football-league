@@ -10,23 +10,48 @@ namespace App\Tests\Controller\Api;
 
 use App\Entity\League;
 use App\Entity\Team;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
  * Class TeamControllerTest
  * @package App\Tests\Controller\Api
  */
-class TeamControllerTest extends WebTestCase
+class TeamControllerTest extends AbstractControllerTest
 {
+
+    private $token;
+
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->token = static::$kernel->getContainer()
+            ->get('lexik_jwt_authentication.encoder')
+            ->encode(['username' => 'my_username']);
+
+    }
+
+    public function testBadToken(): void
+    {
+        $response = $this->client->post('/api/teams', [
+            'body'    => '[]',
+            'headers' => [
+                'Authorization' => 'Bearer WRONG'
+            ]
+        ]);
+        $this->assertEquals(401, $response->getStatusCode());
+    }
+
     public function testGetTeams(): void
     {
-        $client = static::createClient();
 
-        $client->request('GET', '/api/teams');
-        $response = $client->getResponse();
+        $response = $this->client->get('/api/teams', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
 
         $this->assertEquals($response->getStatusCode(), 200);
-        $data = json_decode($response->getContent());
+        $data = json_decode($response->getBody());
 
         $this->assertInternalType('array', $data);
         // $this->assertCount(20, $data);
@@ -35,47 +60,64 @@ class TeamControllerTest extends WebTestCase
 
     public function testPostTeam(): void
     {
-        $client = static::createClient();
+        $response = $this->client->post('/api/teams', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
 
-        $parameters = [];
-        $client->request('POST', '/api/teams', $parameters);
-        $response = $client->getResponse();
         $this->assertEquals(400, $response->getStatusCode());
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('result', $data);
         $this->assertFalse($data['result']);
         $this->assertEquals('Parameter not defined : name', $data['message']);
 
-        $parameters = ['name' => 'PSG'];
-        $client->request('POST', '/api/teams', $parameters);
-        $response = $client->getResponse();
+        $body = ['name' => 'PSG'];
+        $response = $this->client->post('/api/teams', [
+            'body'    => json_encode($body),
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
         $this->assertEquals(400, $response->getStatusCode());
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('result', $data);
         $this->assertFalse($data['result']);
         $this->assertEquals('Parameter not defined : leagueId', $data['message']);
 
-        $parameters = ['name' => 'PSG', 'leagueId' => 12345678];
-        $client->request('POST', '/api/teams', $parameters);
-        $response = $client->getResponse();
+        $body = ['name' => 'PSG', 'leagueId' => 12345678];
+        $response = $this->client->post('/api/teams', [
+            'body'    => json_encode($body),
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
         $this->assertEquals(404, $response->getStatusCode());
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('result', $data);
         $this->assertFalse($data['result']);
-        $this->assertEquals('League does not exist with id:' . $parameters['leagueId'], $data['message']);
+        $this->assertEquals('League does not exist with id:' . $body['leagueId'], $data['message']);
 
-        $client->request('GET', '/api/leagues');
-        $oResponse = $client->getResponse();
-        $result = json_decode($oResponse->getContent(), true);
+        $response = $this->client->get('/api/leagues', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
+        $this->assertEquals(200, $response->getStatusCode());
+        $result = json_decode($response->getBody(), true);
         /** @var League $league */
         $league = reset($result);
 
-        $parameters = ['name' => 'PSG', 'leagueId' => $league['id']];
+        $body = ['name' => 'PSG', 'leagueId' => $league['id']];
 
-        $client->request('POST', '/api/teams', $parameters);
-        $response = $client->getResponse();
+        $response = $this->client->post('/api/teams', [
+            'body'    => json_encode($body),
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
         $this->assertEquals(200, $response->getStatusCode());
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response->getBody(), true);
 
         $this->assertInternalType('array', $data);
         $this->assertArrayHasKey('result', $data);
@@ -85,44 +127,65 @@ class TeamControllerTest extends WebTestCase
 
     }
 
+    public function testMethodNotAllowed(): void
+    {
+
+        $response = $this->client->post('/api/team/12345678', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
+
+        $this->assertEquals(405, $response->getStatusCode());
+        $this->assertEquals('Method Not Allowed', $response->getReasonPhrase());
+    }
+
     public function testPutTeam(): void
     {
-        $client = static::createClient();
+        $response = $this->client->put('/api/team/12345678', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
 
-        $parameters=[];
-        $client->request('PUT', '/api/team/12345678', [], [], [
-            'CONTENT_TYPE' => 'application/json'
-        ], json_encode($parameters));
-
-        $oResponse = $client->getResponse();
-        $this->assertEquals(404, $oResponse->getStatusCode());
-        $data = json_decode($oResponse->getContent(), true);
+        $this->assertEquals(404, $response->getStatusCode());
+        $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('result', $data);
         $this->assertFalse($data['result']);
         $this->assertEquals('Team does not exist with id:12345678', $data['message']);
 
-        $client->request('GET', '/api/leagues');
-        $oResponse = $client->getResponse();
-        $result = json_decode($oResponse->getContent(), true);
+        $response = $this->client->get('/api/leagues', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
+        $result = json_decode($response->getBody(), true);
         /** @var League $league */
         $league = reset($result);
 
-        $client->request('GET', '/api/teams');
-        $oResponse = $client->getResponse();
-        $result = json_decode($oResponse->getContent(), true);
+        $response = $this->client->get('/api/teams', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
+        $result = json_decode($response->getBody(), true);
         /** @var Team $team */
         $team = reset($result);
 
-        $parameters = ['name' => 'SRFC', 'strip' => 'puma', 'leagueId' => $league['id']];
+        $body = ['name' => 'SRFC', 'strip' => 'puma', 'leagueId' => $league['id']];
 
-        $client->request('PUT', '/api/team/' . $team['id'], [], [], [
-            'CONTENT_TYPE' => 'application/json'
-        ], json_encode($parameters));
+        $response = $this->client->put('/api/team/' . $team['id'], [
+            'body'    => json_encode($body),
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token
+            ]
+        ]);
 
-        $oResponse = $client->getResponse();
-        $this->assertEquals(200, $oResponse->getStatusCode());
-        $data = json_decode($oResponse->getContent(), true);
+        $this->assertEquals(200, $response->getStatusCode());
+        $data = json_decode($response->getBody(), true);
         $this->assertArrayHasKey('result', $data);
         $this->assertTrue($data['result']);
     }
+
+
 }
