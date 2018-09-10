@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * @ORM\Table(name="league")
  * @ORM\Entity(repositoryClass="App\Repository\LeagueRepository")
  */
 class League
