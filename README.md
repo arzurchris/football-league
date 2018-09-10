@@ -40,16 +40,16 @@ $ mv config/jwt/private2.pem config/jwt/private.pem
 ### Database
 
 ```
-$ bin/console doctrine:database:create
-$ bin/console doctrine:schema:create
+$ php bin/console doctrine:database:create
+$ php bin/console doctrine:schema:create
 $ php bin/console doctrine:fixtures:load
 ```
 
 ## Running the tests
 
 ```
-$ bin/console server:run
-$ bin/phpunit
+$ php bin/console server:start
+$ php bin/phpunit
 ```
 
 ![alt text](public/readme-phpunit.png)
